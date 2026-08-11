@@ -1,0 +1,3395 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "v6",
+    "title": "Agilpay WebApi",
+    "description": "Agilpay Payment Gateway REST API v6. All endpoints (except /oauth/token) require a Bearer JWT token obtained from the OAuth2 token endpoint using Client Credentials grant."
+  },
+  "servers": [
+    {
+      "url": "https://webapi.agilpay.net",
+      "description": "Production"
+    },
+    {
+      "url": "https://sandbox-webapi.agilpay.net",
+      "description": "Sandbox — use for testing and integration development. No real charges are made."
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Obtain OAuth2 Bearer tokens using Client Credentials grant. **Call this first** — every other endpoint requires `Authorization: Bearer <token>`."
+    },
+    {
+      "name": "Transactions",
+      "description": "Payment processing: authorize, refund, void, capture, and ACH credit disbursements."
+    },
+    {
+      "name": "Tokenization",
+      "description": "Securely store and manage payment methods as reusable tokens, reducing PCI scope."
+    },
+    {
+      "name": "Information",
+      "description": "Query transactions, validate payment data, retrieve balances and available services."
+    },
+    {
+      "name": "Recurring Payments",
+      "description": "Pre-authorized recurring payment schedule management."
+    }
+  ],
+  "paths": {
+    "/oauth/token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Obtain OAuth2 Bearer token",
+        "description": "Generates a JWT Bearer token using the OAuth2 Client Credentials grant. **This token must be sent as `Authorization: Bearer <token>` on every other API call.** Tokens expire after 3600 seconds (1 hour); request a new one before expiry.",
+        "operationId": "OAuth_GetToken",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "description": "Client credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthTokenRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Request a Bearer token",
+                  "value": {
+                    "grant_type": "client_credentials",
+                    "client_id": "your_client_id",
+                    "client_secret": "your_client_secret"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token issued successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutenticationResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                      "token_type": "bearer",
+                      "expires_in": "3600"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Invalid client_id or client_secret"
+          }
+        }
+      }
+    },
+    "/v6/Authorize": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Authorize a payment",
+        "description": "Performs a card-not-present or ACH payment authorization. Set `HoldFunds: true` for a pre-authorization (capture later via CaptureByID). Set `SaveWallet: true` to automatically tokenize the account for future use.",
+        "operationId": "V6_Authorize",
+        "requestBody": {
+          "required": true,
+          "description": "Payment authorization details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeModel"
+              },
+              "examples": {
+                "ach": {
+                  "summary": "ACH / Bank Account",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "2",
+                    "AccountNumber": "56498734546",
+                    "RoutingNumber": "111000025",
+                    "IsDefault": false,
+                    "CustomerId": "OnlineStore@4289",
+                    "CustomerName": "Jacob Toombs",
+                    "CustomerEmail": "xramirez@gmail.com",
+                    "CustomerAddress": "901 Vernon Ave.",
+                    "CustomerCity": "Spring Valley",
+                    "CustomerState": "NY",
+                    "ZipCode": "10977",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "78392",
+                    "Transaction_Detail": "ACH payment test",
+                    "HoldFunds": false,
+                    "SaveWallet": true
+                  }
+                },
+                "credit_card": {
+                  "summary": "Credit Card",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "1",
+                    "AccountNumber": "4709190638740477",
+                    "ExpirationMonth": "10",
+                    "ExpirationYear": "2025",
+                    "CVV": "123",
+                    "IsDefault": false,
+                    "CustomerId": "OnlineStore@4289",
+                    "CustomerName": "Jacob Toombs",
+                    "CustomerEmail": "xramirez@gmail.com",
+                    "CustomerAddress": "901 Vernon Ave.",
+                    "CustomerCity": "Spring Valley",
+                    "CustomerState": "NY",
+                    "ZipCode": "12345",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "78392",
+                    "Transaction_Detail": "Card payment test",
+                    "HoldFunds": false,
+                    "SaveWallet": true
+                  }
+                },
+                "preauth": {
+                  "summary": "Pre-authorization (HoldFunds = true)",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "1",
+                    "AccountNumber": "4709190638740477",
+                    "ExpirationMonth": "10",
+                    "ExpirationYear": "2025",
+                    "CVV": "123",
+                    "CustomerName": "Jacob Toombs",
+                    "ZipCode": "12345",
+                    "Amount": "100.00",
+                    "Currency": "840",
+                    "Invoice": "PRE-78392",
+                    "HoldFunds": true
+                  }
+                },
+                "installments": {
+                  "summary": "Credit Card with Installments",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "1",
+                    "AccountNumber": "4709190638740477",
+                    "ExpirationMonth": "10",
+                    "ExpirationYear": "2025",
+                    "CVV": "123",
+                    "CustomerName": "Jacob Toombs",
+                    "ZipCode": "12345",
+                    "Amount": "120.00",
+                    "Currency": "840",
+                    "Invoice": "INST-78392",
+                    "HoldFunds": false,
+                    "IsInstallments": true,
+                    "InstallmentsCount": 6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — validation error or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid Bearer token"
+          },
+          "403": {
+            "description": "Forbidden — token valid but insufficient permissions"
+          }
+        }
+      }
+    },
+    "/v6/AuthorizeToken": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Authorize a payment using a stored token",
+        "description": "Performs a payment authorization using a previously registered account token (card or ACH). The token is retrieved via RegisterToken or returned in a prior transaction response.",
+        "operationId": "V6_AuthorizeToken",
+        "requestBody": {
+          "required": true,
+          "description": "Token-based payment details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeTokenModel"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Payment with stored token",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                    "CustomerID": "402001",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "78392",
+                    "Transaction_Detail": "Token payment test",
+                    "HoldFunds": false,
+                    "EffectiveDate": "2025-07-10T00:00:00Z"
+                  }
+                },
+                "installments": {
+                  "summary": "Token payment with installments",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                    "CustomerID": "402001",
+                    "Amount": "120.00",
+                    "Currency": "840",
+                    "Invoice": "INST-78393",
+                    "HoldFunds": false,
+                    "IsInstallments": true,
+                    "InstallmentsCount": 6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid Bearer token"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/RegisterToken": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Register a card or ACH account token",
+        "description": "Tokenizes a card or ACH account and associates it with a CustomerID. The returned AccountToken can be used in future AuthorizeToken, RefundToken, and Recurring calls. No charge is made.",
+        "operationId": "V6_RegisterToken",
+        "requestBody": {
+          "required": true,
+          "description": "Card or ACH account details to tokenize",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CardModelExtended"
+              },
+              "examples": {
+                "ach": {
+                  "summary": "Register ACH account",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "2",
+                    "AccountNumber": "56498734546",
+                    "RoutingNumber": "111000025",
+                    "IsDefault": false,
+                    "CustomerId": "OnlineStore@4289",
+                    "CustomerName": "Jacob Toombs",
+                    "CustomerEmail": "xramirez@gmail.com",
+                    "ZipCode": "12345"
+                  }
+                },
+                "card": {
+                  "summary": "Register credit card",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountNumber": "4709190638740477",
+                    "ExpirationMonth": "10",
+                    "ExpirationYear": "2025",
+                    "CustomerName": "Jacob Toombs",
+                    "IsDefault": false,
+                    "CustomerId": "OnlineStore@4289",
+                    "AccountType": "1",
+                    "CustomerEmail": "xramirez@gmail.com",
+                    "ZipCode": "12345"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenInfoV5Response"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Account": "470919XXXXXX0477",
+                      "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                      "CustomerName": "Jacob Toombs",
+                      "CustomerID": "OnlineStore@4289",
+                      "IsDefault": false,
+                      "Status": "ACTIVE",
+                      "AccountType": "1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/GetCustomerTokens": {
+      "get": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "List tokens for a customer",
+        "description": "Returns all active payment tokens (cards and ACH accounts) registered under a CustomerID.",
+        "operationId": "V6_GetCustomerTokens",
+        "parameters": [
+          {
+            "name": "CustomerID",
+            "in": "query",
+            "required": true,
+            "description": "The customer identifier used when registering tokens",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TokenInfoV5Response"
+                  }
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Customer with two tokens",
+                    "value": [
+                      {
+                        "Account": "470919XXXXXX0477",
+                        "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                        "CustomerName": "Jacob Toombs",
+                        "CustomerID": "OnlineStore@4289",
+                        "IsDefault": true,
+                        "Status": "ACTIVE",
+                        "AccountType": "1"
+                      },
+                      {
+                        "Account": "56XXXXX4546",
+                        "AccountToken": "0185613f7fe4b411995e4d2d7c51f570a",
+                        "CustomerName": "Jacob Toombs",
+                        "CustomerID": "OnlineStore@4289",
+                        "IsDefault": false,
+                        "Status": "ACTIVE",
+                        "AccountType": "2"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/DeleteCustomerToken": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Delete a customer token",
+        "description": "Permanently deletes a tokenized card or ACH account for a customer. This action cannot be undone.",
+        "operationId": "V6_DeleteCustomerToken",
+        "requestBody": {
+          "required": true,
+          "description": "Token and customer to delete",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeletecardModel"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Delete a token",
+                  "value": {
+                    "AccountToken": "098f2166c82df49cea046bf29e941af68",
+                    "CustomerID": "Merchant123@4289"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/Refund": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Process a refund (card/ACH data)",
+        "description": "Processes a refund by supplying the original card or ACH details. Use RefundByID when you have the original IDTransaction, or RefundToken when using a stored token.",
+        "operationId": "V6_Refund",
+        "requestBody": {
+          "required": true,
+          "description": "Refund transaction details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeModel"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Refund by card data",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "1",
+                    "AccountNumber": "4709190638740477",
+                    "ExpirationMonth": "10",
+                    "ExpirationYear": "2025",
+                    "CVV": "123",
+                    "CustomerId": "OnlineStore@4289",
+                    "CustomerName": "Jacob Toombs",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Invoice": "78392"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Refunded",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/RefundToken": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Process a refund using a stored token",
+        "description": "Refunds a transaction using a stored account token.",
+        "operationId": "V6_RefundToken",
+        "requestBody": {
+          "required": true,
+          "description": "Refund details with account token",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeTokenModel"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Refund using stored token",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                    "CustomerID": "049382399",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "78392",
+                    "HoldFunds": false,
+                    "Transaction_Detail": "test"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Refunded",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/RefundByID": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Refund by original transaction ID",
+        "description": "Processes a refund referencing the original IDTransaction. Supports full and partial refunds. For partial refunds, include the Amount field.",
+        "operationId": "V6_RefundByID",
+        "requestBody": {
+          "required": true,
+          "description": "Original transaction reference",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidByIDRequest"
+              },
+              "examples": {
+                "full": {
+                  "summary": "Full refund by transaction ID",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "IDTransaction": 4086
+                  }
+                },
+                "partial": {
+                  "summary": "Partial refund",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "IDTransaction": 4086,
+                    "Amount": 2.5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Refunded",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/VoidByID": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Void a transaction by ID",
+        "description": "Voids (cancels) an authorized or pre-authorized transaction before settlement, using its IDTransaction. Void is only possible before the batch is closed.",
+        "operationId": "V6_VoidByID",
+        "requestBody": {
+          "required": true,
+          "description": "Transaction to void",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidByIDRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Void by transaction ID",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "IDTransaction": 4086
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction voided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Voided",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/VoidSale": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Void a sale by auth/audit number",
+        "description": "Voids a sale using its AuthNumber, ReferenceCode, and AuditNumber instead of IDTransaction. Use when you don't have the internal transaction ID.",
+        "operationId": "V6_VoidSale",
+        "requestBody": {
+          "required": true,
+          "description": "Sale identifiers",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidSaleRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Void by auth/audit number",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AuthNumber": "154878",
+                    "ReferenceCode": "T:H3L37R6LLA5",
+                    "AuditNumber": "23"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sale voided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Voided",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/CaptureByID": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Capture a pre-authorized transaction",
+        "description": "Captures (settles) a pre-authorization created with `HoldFunds: true`. The amount captured will equal the original authorized amount.",
+        "operationId": "V6_CaptureByID",
+        "requestBody": {
+          "required": true,
+          "description": "Transaction to capture",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Capture pre-authorized transaction",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "IDTransaction": 4086
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Captured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved - Pending Settlement",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/CaptureAdjustmendByID": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Capture a pre-authorized transaction with amount adjustment",
+        "description": "Captures a pre-authorization and adjusts the final amount (e.g., to add tip). The new Amount must not exceed the original authorized amount unless allowed by your acquirer configuration.",
+        "operationId": "V6_CaptureAdjustmendByID",
+        "requestBody": {
+          "required": true,
+          "description": "Transaction ID and adjusted amount",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureAdjustmentRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Capture with tip adjustment",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "IDTransaction": 4086,
+                    "Amount": 12.57
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Captured with adjustment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved - Pending Settlement",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 12.57,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/GetTransactionByID": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Get transaction by ID",
+        "description": "Retrieves full transaction details using the internal IDTransaction returned in the authorization response.",
+        "operationId": "V6_GetTransactionByID",
+        "parameters": [
+          {
+            "name": "MerchantKey",
+            "in": "query",
+            "required": true,
+            "description": "Merchant key assigned by Agilpay",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IDTransaction",
+            "in": "query",
+            "required": true,
+            "description": "Internal transaction ID returned in the authorization response",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Approved transaction details",
+                    "value": {
+                      "Invoice": "78392",
+                      "Account": "404984XXXXXX6637",
+                      "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                      "IDTransaction": "4086",
+                      "BatchCode": "001",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved",
+                      "CardHolderName": "Juan Perez Cuevas",
+                      "AuditNumber": "23",
+                      "ResponseCode": "00",
+                      "DesicionResponseCode": "00",
+                      "Message": "Success",
+                      "AuthNumber": "154878",
+                      "HostDate": "1303",
+                      "HostTime": "032153",
+                      "Reference_Code": "T:H3L37R6LLA5",
+                      "AVSResult": "Y",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/GetTransactionByReference": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Search transactions by reference/invoice",
+        "description": "Returns a list of transactions matching the given invoice/reference number. Date range and other filters are optional.",
+        "operationId": "V6_GetTransactionByReference",
+        "parameters": [
+          {
+            "name": "invoice",
+            "in": "query",
+            "required": true,
+            "description": "Invoice or reference number to search for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fecha_desde",
+            "in": "query",
+            "required": false,
+            "description": "Start date filter (ISO 8601 / UTC). Optional.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "fecha_hasta",
+            "in": "query",
+            "required": false,
+            "description": "End date filter (ISO 8601 / UTC). Optional.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "response_code",
+            "in": "query",
+            "required": false,
+            "description": "Filter by processor response code (e.g. '00' for approved). Optional.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transaction_type",
+            "in": "query",
+            "required": false,
+            "description": "Filter by type: SALE, REFUND, VOID, CAPTURE. Optional.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SALE",
+                "REFUND",
+                "VOID",
+                "CAPTURE"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status: APPROVED, DECLINED, PENDING. Optional.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "APPROVED",
+                "DECLINED",
+                "PENDING"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionResponse"
+                  }
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Matching transactions",
+                    "value": [
+                      {
+                        "Invoice": "78392",
+                        "Account": "404984XXXXXX6637",
+                        "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                        "IDTransaction": "4086",
+                        "BatchCode": "001",
+                        "AcquirerName": "ProfitStars",
+                        "Status": "Approved",
+                        "CardHolderName": "Juan Perez Cuevas",
+                        "AuditNumber": "23",
+                        "ResponseCode": "00",
+                        "DesicionResponseCode": "00",
+                        "Message": "Success",
+                        "AuthNumber": "154878",
+                        "HostDate": "1303",
+                        "HostTime": "032153",
+                        "Reference_Code": "T:H3L37R6LLA5",
+                        "AVSResult": "Y",
+                        "Amount": 4.4,
+                        "Currency": "840"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/GetBalance": {
+      "post": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Get customer balance",
+        "description": "Retrieves outstanding balance and invoice information for a customer. Typically used in bill payment flows.",
+        "operationId": "V6_GetBalance",
+        "requestBody": {
+          "required": true,
+          "description": "Balance inquiry parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BalanceRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Balance inquiry",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "ABC-1234459"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Balance information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Success",
+                      "CustomerName": "Jacob Toombs",
+                      "CustomerEmail": "jtoombs@mail.com",
+                      "CustomerAddress": {
+                        "Street": "9012 Vernon Ave.",
+                        "City": "Spring Valley",
+                        "State": "NY",
+                        "ZipCode": "10977"
+                      },
+                      "TotalAmount": "148.98",
+                      "MaxAmount": "148.98",
+                      "MinAmount": "0.01",
+                      "ExtData": {},
+                      "Invoices": [
+                        {
+                          "Number": "INV-001",
+                          "Date": "2025-01-15",
+                          "Total_Amount": "148.98",
+                          "Min_Amount": 0.01,
+                          "Max_Amount": 148.98,
+                          "Description": "Monthly service fee"
+                        }
+                      ],
+                      "Last_Transactions": [
+                        {
+                          "PaymentDate": "2025-05-01",
+                          "AccountNumber": "XXXX6637",
+                          "AccountType": "1",
+                          "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                          "Amount": "50.00",
+                          "Email": "jtoombs@mail.com",
+                          "Phone": "5551234567"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/CloseBatchResumen": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Close batch / End of Day",
+        "description": "Closes the current open batch and initiates settlement with the acquirer. `Client_Id` identifies the affiliate/site; `MerchantKey` identifies the terminal. Set `ForzarBatch: true` to force close even if the batch is empty.",
+        "operationId": "V6_CloseBatchResumen",
+        "requestBody": {
+          "required": true,
+          "description": "Batch close parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseBatchResumenRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Close batch for a terminal",
+                  "value": {
+                    "MerchantKey": "DN001",
+                    "Client_Id": "DN-001",
+                    "Currency": "840",
+                    "ForzarBatch": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/IsValidCard": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Validate a card number (Luhn check)",
+        "description": "Performs a Luhn algorithm check on the provided card number. Returns true if the number is structurally valid. Does not validate against the card network or check if the card is active.",
+        "operationId": "V6_IsValidCard",
+        "parameters": [
+          {
+            "name": "CardNumber",
+            "in": "query",
+            "required": true,
+            "description": "Card number (digits only, no spaces or dashes)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "true if the card number passes the Luhn check; otherwise false",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v6/IsValidRoutingNumber": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Validate an ACH routing number",
+        "description": "Validates a US bank routing number (ABA) using the standard checksum algorithm.",
+        "operationId": "V6_IsValidRoutingNumber",
+        "parameters": [
+          {
+            "name": "RoutingNumber",
+            "in": "query",
+            "required": true,
+            "description": "9-digit ABA routing number",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "true if valid; otherwise false",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v6/GetServices": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "summary": "Get bill payment services for a client",
+        "description": "Returns the list of bill payment services (billers/utilities) available for a given client_id. Used in bill payment and top-up flows before calling the Bill Payments Authorize endpoint.",
+        "operationId": "V6_GetServices",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "description": "Client/affiliate identifier assigned by Agilpay",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available services",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacturadoresResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/Recurring/add": {
+      "post": {
+        "tags": [
+          "Recurring Payments"
+        ],
+        "summary": "Create a recurring payment",
+        "description": "Sets up a new pre-authorized recurring payment schedule for a customer. The AccountToken must be previously registered via RegisterToken.",
+        "operationId": "V6_Recurring_Add",
+        "requestBody": {
+          "required": true,
+          "description": "Recurring payment configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecurringHeader"
+              },
+              "examples": {
+                "monthly": {
+                  "summary": "Monthly recurring — 6 installments",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "OnlineStore@4289",
+                    "Service": "MONTHLY-PLAN",
+                    "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                    "Period": "MONTHLY",
+                    "Frequency": 1,
+                    "Day": 15,
+                    "Quantity": 6,
+                    "Amount": 35.22,
+                    "Currency": "840",
+                    "FromDate": "2025-06-15",
+                    "ToDate": "2025-12-15"
+                  }
+                },
+                "indefinite": {
+                  "summary": "Open-ended recurring (no end date)",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "OnlineStore@4289",
+                    "Service": "SUBSCRIPTION",
+                    "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                    "Period": "MONTHLY",
+                    "Frequency": 1,
+                    "Day": 1,
+                    "Quantity": 0,
+                    "Amount": 99,
+                    "Currency": "840",
+                    "FromDate": "2025-07-01"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recurring payment created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Success",
+                      "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                      "Account": "470919XXXXXX0477",
+                      "Period": "MONTHLY",
+                      "Frequency": 1,
+                      "Day": 15,
+                      "Quantity": 6,
+                      "Amount": 35.22,
+                      "Currency": "840",
+                      "FromDate": "2025-06-15T00:00:00Z",
+                      "ToDate": "2025-12-15T00:00:00Z",
+                      "LastProcessDate": null,
+                      "Transactions": [],
+                      "RemainingTries": 6,
+                      "Status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error creating recurring payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/Recurring/update": {
+      "post": {
+        "tags": [
+          "Recurring Payments"
+        ],
+        "summary": "Update a recurring payment",
+        "description": "Updates an existing recurring payment schedule. Fields not provided will retain their current values.",
+        "operationId": "V6_Recurring_Update",
+        "requestBody": {
+          "required": true,
+          "description": "Recurring payment configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecurringHeader"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Update amount",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "OnlineStore@4289",
+                    "Service": "MONTHLY-PLAN",
+                    "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                    "Amount": 45,
+                    "Currency": "840"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recurring payment updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Success",
+                      "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                      "Account": "470919XXXXXX0477",
+                      "Period": "MONTHLY",
+                      "Frequency": 1,
+                      "Day": 15,
+                      "Quantity": 6,
+                      "Amount": 35.22,
+                      "Currency": "840",
+                      "FromDate": "2025-06-15T00:00:00Z",
+                      "ToDate": "2025-12-15T00:00:00Z",
+                      "LastProcessDate": null,
+                      "Transactions": [],
+                      "RemainingTries": 6,
+                      "Status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error updating",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/Recurring/get": {
+      "get": {
+        "tags": [
+          "Recurring Payments"
+        ],
+        "summary": "Get recurring payment details",
+        "description": "Retrieves the full details and transaction history of a recurring payment agreement.",
+        "operationId": "V6_Recurring_Get",
+        "parameters": [
+          {
+            "name": "MerchantKey",
+            "in": "query",
+            "required": true,
+            "description": "Merchant key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "CustomerId",
+            "in": "query",
+            "required": true,
+            "description": "Customer ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Service",
+            "in": "query",
+            "required": true,
+            "description": "Service identifier for the recurring plan",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recurring payment details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringResponse"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Active recurring plan",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Success",
+                      "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                      "Account": "470919XXXXXX0477",
+                      "Period": "MONTHLY",
+                      "Frequency": 1,
+                      "Day": 15,
+                      "Quantity": 6,
+                      "Amount": 35.22,
+                      "Currency": "840",
+                      "FromDate": "2025-06-15T00:00:00Z",
+                      "ToDate": "2025-12-15T00:00:00Z",
+                      "LastProcessDate": null,
+                      "Transactions": [],
+                      "RemainingTries": 6,
+                      "Status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error retrieving",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/Recurring/change": {
+      "post": {
+        "tags": [
+          "Recurring Payments"
+        ],
+        "summary": "Change recurring payment status",
+        "description": "Changes the status of a recurring payment. Use the `Status` field in the request body with values: ACTIVE, PAUSED, CANCELLED.",
+        "operationId": "V6_Recurring_Change",
+        "requestBody": {
+          "required": true,
+          "description": "Recurring payment configuration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecurringHeader"
+              },
+              "examples": {
+                "pause": {
+                  "summary": "Pause plan",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "OnlineStore@4289",
+                    "Service": "MONTHLY-PLAN",
+                    "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                    "Amount": 35.22,
+                    "Currency": "840",
+                    "Status": "PAUSED"
+                  }
+                },
+                "cancel": {
+                  "summary": "Cancel plan",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "CustomerId": "OnlineStore@4289",
+                    "Service": "MONTHLY-PLAN",
+                    "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                    "Amount": 35.22,
+                    "Currency": "840",
+                    "Status": "CANCELLED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurringResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Approved transaction",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Success",
+                      "AccountToken": "4821c21bd31004e8b9ff883b82ea5aa3f",
+                      "Account": "470919XXXXXX0477",
+                      "Period": "MONTHLY",
+                      "Frequency": 1,
+                      "Day": 15,
+                      "Quantity": 6,
+                      "Amount": 35.22,
+                      "Currency": "840",
+                      "FromDate": "2025-06-15T00:00:00Z",
+                      "ToDate": "2025-12-15T00:00:00Z",
+                      "LastProcessDate": null,
+                      "Transactions": [],
+                      "RemainingTries": 6,
+                      "Status": "PAUSED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error changing status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/ApplyCredit": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Apply ACH credit (push payment)",
+        "description": "Credits (pushes) funds to an ACH checking or savings account. This is the reverse of a debit authorization — money moves from the merchant to the customer's bank account. Use for refunds, disbursements, or payouts to ACH accounts.\n\nSupports ACH-Checking (`AccountType: 2`) and ACH-Savings (`AccountType: 3`) only. Set `SaveWallet: true` to tokenize the account for future use.",
+        "operationId": "V6_ApplyCredit",
+        "requestBody": {
+          "required": true,
+          "description": "ACH account details and credit amount",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCreditRequest"
+              },
+              "examples": {
+                "checking": {
+                  "summary": "Credit to ACH checking account",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountType": "2",
+                    "AccountNumber": "56498734546",
+                    "RoutingNumber": "111000025",
+                    "EffectiveDate": "2025-07-01T00:00:00Z",
+                    "CustomerId": "OnlineStore@4289",
+                    "CustomerName": "Jacob Toombs",
+                    "CustomerEmail": "xramirez@gmail.com",
+                    "CustomerAddress": "901 Vernon Ave.",
+                    "CustomerCity": "Spring Valley",
+                    "CustomerState": "NY",
+                    "ZipCode": "10977",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "CREDIT-78392",
+                    "Transaction_Detail": "Refund disbursement"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credit processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                },
+                "examples": {
+                  "approved": {
+                    "summary": "Credit approved",
+                    "value": {
+                      "ResponseCode": "00",
+                      "Message": "Processed",
+                      "AuthNumber": "T:BPJR113RA08",
+                      "Account": "XXXXXXXXX5678",
+                      "AccountToken": "2efb154ee80ea46b69d8d4862623233df",
+                      "IDTransaction": "795612",
+                      "BatchCode": "2993",
+                      "AcquirerName": "ProfitStars",
+                      "Status": "Approved - Pending Settlement",
+                      "CardHolderName": "Jacob Toombs",
+                      "HostDate": "0107",
+                      "HostTime": "041612",
+                      "Reference_Code": "T:BPJR113RA08",
+                      "Amount": 4.4,
+                      "Currency": "840"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v6/ApplyCreditToken": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Apply ACH credit using a stored token (push payment)",
+        "description": "Credits funds to an ACH account using a previously stored token. Functionally equivalent to ApplyCredit but uses a stored `AccountToken` instead of raw account data.",
+        "operationId": "V6_ApplyCreditToken",
+        "requestBody": {
+          "required": true,
+          "description": "Token and credit details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCreditTokenRequest"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Credit using stored token",
+                  "value": {
+                    "MerchantKey": "LTE2NDUxMDA4NDQ=",
+                    "AccountToken": "4973d493e5fe14899a62e66375acb0c3b",
+                    "Amount": "4.40",
+                    "Currency": "840",
+                    "Tax": "0",
+                    "Invoice": "CREDIT-78392",
+                    "Transaction_Detail": "Refund disbursement",
+                    "EffectiveDate": "2025-07-01T00:00:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credit processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token obtained from POST /oauth/token using Client Credentials grant."
+      }
+    },
+    "requestBodies": {
+      "AutorizeModel_v2": {
+        "required": true,
+        "description": "Payment authorization details",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthorizeModel"
+            }
+          }
+        }
+      },
+      "AutorizeToken": {
+        "required": true,
+        "description": "Token-based payment details",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthorizeTokenModel"
+            }
+          }
+        }
+      },
+      "RecurringHeader": {
+        "required": true,
+        "description": "Recurring payment configuration",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RecurringHeader"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "OAuthTokenRequest": {
+        "required": [
+          "grant_type",
+          "client_id",
+          "client_secret"
+        ],
+        "type": "object",
+        "description": "Client credentials for OAuth2 token request.",
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "client_credentials"
+            ],
+            "description": "Must be 'client_credentials'"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Client ID provided by Agilpay"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Client secret provided by Agilpay"
+          }
+        }
+      },
+      "AutenticationResponse": {
+        "type": "object",
+        "description": "OAuth2 token response.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT Bearer token. Send this as 'Authorization: Bearer <token>' on all subsequent requests."
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "bearer"
+            ],
+            "description": "Always 'bearer'"
+          },
+          "expires_in": {
+            "type": "string",
+            "description": "Token lifetime in seconds (typically 3600)"
+          }
+        }
+      },
+      "AuthorizeModel": {
+        "required": [
+          "MerchantKey",
+          "Amount",
+          "Currency"
+        ],
+        "type": "object",
+        "description": "Payment authorization request. Supports credit/debit cards and ACH. For card payments, provide AccountNumber + ExpirationMonth + ExpirationYear + CVV. For ACH, provide AccountNumber + RoutingNumber + AccountType.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string",
+            "description": "Merchant terminal key assigned by Agilpay"
+          },
+          "AccountType": {
+            "type": "string",
+            "description": "Payment method type. Values: VISA, MASTERCARD, AMEX, DISCOVER, CHECKING, SAVINGS"
+          },
+          "AccountNumber": {
+            "type": "string",
+            "description": "Card number or ACH account number (plain text — transmitted over TLS)"
+          },
+          "RoutingNumber": {
+            "type": "string",
+            "description": "ACH routing number (9 digits). Required for ACH transactions."
+          },
+          "ExpirationMonth": {
+            "type": "string",
+            "description": "Card expiration month (MM format, e.g. '07'). Required for card transactions."
+          },
+          "ExpirationYear": {
+            "type": "string",
+            "description": "Card expiration year (YY or YYYY format). Required for card transactions."
+          },
+          "CustomerID": {
+            "type": "string",
+            "description": "Your system's customer identifier. Used to associate tokens and transactions with a customer."
+          },
+          "CustomerName": {
+            "type": "string",
+            "description": "Cardholder or account holder full name"
+          },
+          "CustomerEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address (used for receipts)"
+          },
+          "CustomerAddress": {
+            "type": "string",
+            "description": "Customer street address (used for AVS verification)"
+          },
+          "CustomerCity": {
+            "type": "string",
+            "description": "Customer city"
+          },
+          "CustomerState": {
+            "type": "string",
+            "description": "Customer state (2-letter US state code, e.g. 'FL')"
+          },
+          "CustomerPhone": {
+            "type": "string",
+            "description": "Customer phone number"
+          },
+          "ZipCode": {
+            "type": "string",
+            "description": "Billing ZIP code (used for AVS verification)"
+          },
+          "Amount": {
+            "type": "string",
+            "description": "Transaction amount as a decimal string (e.g. '10.00'). Do not include currency symbols."
+          },
+          "Currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code (e.g. 'USD', 'DOP')"
+          },
+          "Tax": {
+            "type": "string",
+            "description": "Tax amount as a decimal string (e.g. '1.50'). Optional."
+          },
+          "CVV": {
+            "type": "string",
+            "description": "Card CVV/CVC security code. Recommended for card-not-present transactions."
+          },
+          "Invoice": {
+            "type": "string",
+            "description": "Your reference/invoice number. Used to retrieve the transaction later via GetTransactionByReference."
+          },
+          "Transaction_Detail": {
+            "type": "string",
+            "description": "Free-text description of the transaction (appears on statements)"
+          },
+          "HoldFunds": {
+            "type": "boolean",
+            "description": "Set to true for pre-authorization (no settlement). Funds are reserved but not captured. Capture later using CaptureByID or CaptureAdjustmendByID."
+          },
+          "SaveWallet": {
+            "type": "boolean",
+            "description": "Set to true to automatically tokenize the account and store it in the customer's wallet. The token is returned in AccountToken of the response."
+          },
+          "ForceDuplicate": {
+            "type": "boolean",
+            "description": "Set to true to bypass duplicate transaction detection and force processing. Use with caution."
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended data field for custom metadata. Format is implementation-specific — contact Agilpay for your configuration. Returned as-is in the response and webhooks."
+          },
+          "IsInstallments": {
+            "type": "boolean",
+            "description": "Set to true to process as an installment payment. Requires InstallmentsCount and acquirer support for installments."
+          },
+          "InstallmentsCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of installments (e.g. 3, 6, 12). Required when IsInstallments is true. Supported values depend on acquirer."
+          },
+          "EffectiveDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Effective date for ACH transactions. Optional."
+          },
+          "IsDefault": {
+            "type": "boolean",
+            "description": "When SaveWallet is true, marks this token as the customer's default payment method."
+          },
+          "NameOnAccount": {
+            "type": "string",
+            "description": "Name printed on the card or ACH account holder name"
+          },
+          "ThreeDS": {
+            "$ref": "#/components/schemas/ThreeDS"
+          }
+        }
+      },
+      "AuthorizeTokenModel": {
+        "required": [
+          "MerchantKey",
+          "AccountToken",
+          "Amount",
+          "Currency"
+        ],
+        "type": "object",
+        "description": "Token-based payment request. The AccountToken must be a token previously registered via RegisterToken or returned by a prior transaction.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string",
+            "description": "Merchant terminal key"
+          },
+          "AccountToken": {
+            "type": "string",
+            "description": "Stored payment token obtained from RegisterToken or a prior transaction response"
+          },
+          "CustomerID": {
+            "type": "string",
+            "description": "Customer identifier"
+          },
+          "CustomerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "CustomerPhone": {
+            "type": "string"
+          },
+          "Amount": {
+            "type": "string",
+            "description": "Amount as decimal string (e.g. '25.00')"
+          },
+          "Currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code (e.g. 'USD')"
+          },
+          "Tax": {
+            "type": "string",
+            "description": "Tax amount as decimal string. Optional."
+          },
+          "Invoice": {
+            "type": "string"
+          },
+          "Transaction_Detail": {
+            "type": "string"
+          },
+          "HoldFunds": {
+            "type": "boolean",
+            "description": "True for pre-authorization (capture later)"
+          },
+          "EffectiveDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CVV": {
+            "type": "string",
+            "description": "CVV for additional verification. Optional depending on acquirer configuration."
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended metadata. See AuthorizeModel.ExtData."
+          },
+          "IsInstallments": {
+            "type": "boolean"
+          },
+          "InstallmentsCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TransactionResponse": {
+        "type": "object",
+        "description": "Standard transaction response returned by authorization, refund, void, and capture operations.",
+        "properties": {
+          "Invoice": {
+            "type": "string",
+            "description": "Your reference/invoice number"
+          },
+          "Account": {
+            "type": "string",
+            "description": "Masked account number (last 4 digits, e.g. 'XXXXXXXXXXXX1234')"
+          },
+          "AccountToken": {
+            "type": "string",
+            "description": "Token for the account used. Present when SaveWallet was true or when using RegisterToken."
+          },
+          "IDTransaction": {
+            "type": "string",
+            "description": "Agilpay internal transaction ID. Use this for VoidByID, CaptureByID, RefundByID, and GetTransactionByID."
+          },
+          "BatchCode": {
+            "type": "string",
+            "description": "Settlement batch identifier"
+          },
+          "AcquirerName": {
+            "type": "string",
+            "description": "Name of the acquiring bank that processed the transaction"
+          },
+          "Status": {
+            "type": "string",
+            "description": "Transaction status: APPROVED, DECLINED, PENDING, VOIDED, REFUNDED"
+          },
+          "CardHolderName": {
+            "type": "string"
+          },
+          "AuditNumber": {
+            "type": "string",
+            "description": "Acquirer audit/trace number"
+          },
+          "ResponseCode": {
+            "type": "string",
+            "description": "Agilpay response code. '00' = approved. See Response Code Table in documentation."
+          },
+          "DesicionResponseCode": {
+            "type": "string",
+            "description": "Processor-level decision response code"
+          },
+          "Message": {
+            "type": "string",
+            "description": "Human-readable response message"
+          },
+          "AuthNumber": {
+            "type": "string",
+            "description": "Authorization number from the card network"
+          },
+          "HostDate": {
+            "type": "string",
+            "description": "Date of processing at the host (YYYYMMDD)"
+          },
+          "HostTime": {
+            "type": "string",
+            "description": "Time of processing at the host (HHmmss)"
+          },
+          "Reference_Code": {
+            "type": "string"
+          },
+          "AVSResult": {
+            "type": "string",
+            "description": "Address Verification Service result code"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Processed amount"
+          },
+          "Currency": {
+            "type": "string"
+          }
+        }
+      },
+      "CardModelExtended": {
+        "required": [
+          "AccountNumber",
+          "AccountType",
+          "CustomerName",
+          "CustomerID",
+          "ZipCode"
+        ],
+        "type": "object",
+        "description": "Card or ACH account details for tokenization. No payment is charged — this only registers the token.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string",
+            "description": "Merchant terminal key"
+          },
+          "AccountNumber": {
+            "type": "string",
+            "description": "Card number or ACH account number"
+          },
+          "ExpirationMonth": {
+            "type": "string",
+            "description": "Expiration month (MM). Required for card accounts."
+          },
+          "ExpirationYear": {
+            "type": "string",
+            "description": "Expiration year (YY or YYYY). Required for card accounts."
+          },
+          "IsDefault": {
+            "type": "boolean",
+            "description": "Mark as the customer's default payment method"
+          },
+          "AccountType": {
+            "type": "string",
+            "description": "Account type: VISA, MASTERCARD, AMEX, DISCOVER, CHECKING, SAVINGS"
+          },
+          "RoutingNumber": {
+            "type": "string",
+            "description": "ACH routing number. Required for CHECKING/SAVINGS accounts."
+          },
+          "Currency": {
+            "type": "string"
+          },
+          "CVVNumber": {
+            "type": "string",
+            "description": "Card CVV. Stored temporarily for initial validation only — not persisted."
+          },
+          "CustomerName": {
+            "type": "string"
+          },
+          "CustomerID": {
+            "type": "string",
+            "description": "Your system's customer identifier"
+          },
+          "CustomerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "ZipCode": {
+            "type": "string"
+          },
+          "CustomerAddress": {
+            "type": "string"
+          },
+          "CustomerCity": {
+            "type": "string"
+          },
+          "CustomerState": {
+            "type": "string"
+          },
+          "NameOnAccount": {
+            "type": "string"
+          }
+        }
+      },
+      "TokenInfoV5Response": {
+        "type": "object",
+        "properties": {
+          "Account": {
+            "type": "string",
+            "description": "Masked account number"
+          },
+          "AccountToken": {
+            "type": "string",
+            "description": "Token to use in AuthorizeToken, RefundToken, and Recurring calls"
+          },
+          "CustomerName": {
+            "type": "string"
+          },
+          "CustomerID": {
+            "type": "string"
+          },
+          "IsDefault": {
+            "type": "boolean"
+          },
+          "Status": {
+            "type": "string",
+            "description": "Token status: ACTIVE, INACTIVE, EXPIRED"
+          },
+          "AccountType": {
+            "type": "string"
+          }
+        }
+      },
+      "DeletecardModel": {
+        "required": [
+          "AccountToken",
+          "CustomerID"
+        ],
+        "type": "object",
+        "properties": {
+          "AccountToken": {
+            "type": "string"
+          },
+          "CustomerID": {
+            "type": "string"
+          }
+        }
+      },
+      "VoidByIDRequest": {
+        "type": "object",
+        "required": [
+          "MerchantKey",
+          "IDTransaction"
+        ],
+        "properties": {
+          "MerchantKey": {
+            "type": "string"
+          },
+          "IDTransaction": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Internal transaction ID from the original authorization response"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Amount for partial refund (RefundByID only). Omit for full void/refund."
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended metadata. Optional."
+          }
+        }
+      },
+      "VoidSaleRequest": {
+        "type": "object",
+        "required": [
+          "MerchantKey"
+        ],
+        "properties": {
+          "MerchantKey": {
+            "type": "string"
+          },
+          "AuthNumber": {
+            "type": "string",
+            "description": "Authorization number from the original transaction response"
+          },
+          "ReferenceCode": {
+            "type": "string",
+            "description": "Reference code from the original transaction"
+          },
+          "AuditNumber": {
+            "type": "string",
+            "description": "Audit number from the original transaction"
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended metadata. Optional."
+          }
+        }
+      },
+      "CaptureRequest": {
+        "type": "object",
+        "required": [
+          "IDTransaction",
+          "MerchantKey"
+        ],
+        "properties": {
+          "IDTransaction": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Transaction ID of the pre-authorization to capture"
+          },
+          "MerchantKey": {
+            "type": "string"
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended metadata. Optional."
+          }
+        }
+      },
+      "CaptureAdjustmentRequest": {
+        "type": "object",
+        "required": [
+          "IDTransaction",
+          "MerchantKey",
+          "Amount"
+        ],
+        "properties": {
+          "IDTransaction": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "MerchantKey": {
+            "type": "string"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Adjusted capture amount. Must not exceed the original authorized amount unless configured otherwise."
+          },
+          "ExtData": {
+            "type": "string",
+            "description": "Extended metadata. Optional."
+          }
+        }
+      },
+      "CloseBatchResumenRequest": {
+        "type": "object",
+        "required": [
+          "Client_Id",
+          "MerchantKey"
+        ],
+        "description": "Client_Id identifies the affiliate/site. MerchantKey identifies the terminal within that site.",
+        "properties": {
+          "Client_Id": {
+            "type": "string",
+            "description": "Affiliate/site client ID assigned by Agilpay"
+          },
+          "MerchantKey": {
+            "type": "string",
+            "description": "Merchant terminal key"
+          },
+          "Currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code. Required when the terminal operates multi-currency."
+          },
+          "ForzarBatch": {
+            "type": "boolean",
+            "description": "Set to true to force batch close even if the batch is empty or already closed"
+          }
+        }
+      },
+      "BalanceRequest": {
+        "type": "object",
+        "required": [
+          "MerchantKey",
+          "CustomerId"
+        ],
+        "properties": {
+          "MerchantKey": {
+            "type": "string"
+          },
+          "CustomerId": {
+            "type": "string"
+          }
+        }
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "ResponseCode": {
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "CustomerName": {
+            "type": "string"
+          },
+          "CustomerEmail": {
+            "type": "string"
+          },
+          "CustomerAddress": {
+            "$ref": "#/components/schemas/CustomerAddress"
+          },
+          "TotalAmount": {
+            "type": "string"
+          },
+          "MaxAmount": {
+            "type": "string"
+          },
+          "MinAmount": {
+            "type": "string"
+          },
+          "ExtData": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "Invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItem"
+            }
+          },
+          "Last_Transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LastTransaction"
+            }
+          }
+        }
+      },
+      "CustomerAddress": {
+        "type": "object",
+        "properties": {
+          "Street": {
+            "type": "string"
+          },
+          "City": {
+            "type": "string"
+          },
+          "State": {
+            "type": "string"
+          },
+          "ZipCode": {
+            "type": "string"
+          }
+        }
+      },
+      "InvoiceItem": {
+        "type": "object",
+        "properties": {
+          "Number": {
+            "type": "string"
+          },
+          "Date": {
+            "type": "string"
+          },
+          "Total_Amount": {
+            "type": "string"
+          },
+          "Min_Amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "Max_Amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "Description": {
+            "type": "string"
+          }
+        }
+      },
+      "LastTransaction": {
+        "type": "object",
+        "properties": {
+          "PaymentDate": {
+            "type": "string"
+          },
+          "AccountNumber": {
+            "type": "string"
+          },
+          "AccountType": {
+            "type": "string"
+          },
+          "AccountToken": {
+            "type": "string"
+          },
+          "Amount": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Phone": {
+            "type": "string"
+          }
+        }
+      },
+      "FacturadoresResult": {
+        "type": "object",
+        "description": "Bill payment service (biller) information",
+        "properties": {
+          "IDFacturador": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Biller ID"
+          },
+          "IDServicio": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Service ID"
+          },
+          "Identificacion": {
+            "type": "string"
+          },
+          "NombreFacturador": {
+            "type": "string",
+            "description": "Biller name"
+          },
+          "Codigo": {
+            "type": "string"
+          },
+          "NombreServicio": {
+            "type": "string",
+            "description": "Service name"
+          },
+          "nvTipo_Servicio": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Service type code"
+          },
+          "TipoCodigoContrato": {
+            "type": "string"
+          },
+          "FormatoCodigoContrato": {
+            "type": "string"
+          },
+          "FormasDePago": {
+            "type": "string",
+            "description": "Accepted payment methods"
+          },
+          "Moneda": {
+            "type": "string",
+            "description": "Currency"
+          },
+          "IdentificadorServicio": {
+            "type": "string"
+          },
+          "ExtraData": {
+            "type": "string"
+          },
+          "Clasificacion": {
+            "type": "string"
+          }
+        }
+      },
+      "RecurringHeader": {
+        "required": [
+          "MerchantKey",
+          "Service",
+          "CustomerId",
+          "AccountToken",
+          "Amount",
+          "Currency"
+        ],
+        "type": "object",
+        "description": "Recurring payment configuration. For status changes, only MerchantKey, CustomerId, Service, and Status are required.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string"
+          },
+          "Service": {
+            "type": "string",
+            "description": "Service identifier for the recurring plan"
+          },
+          "CustomerId": {
+            "type": "string"
+          },
+          "AccountToken": {
+            "type": "string",
+            "description": "Stored payment token to charge on each recurrence"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Amount to charge on each recurrence"
+          },
+          "Currency": {
+            "type": "string"
+          },
+          "Frequency": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Frequency value (e.g. 1 = every Period, 2 = every 2 Periods)"
+          },
+          "Period": {
+            "type": "string",
+            "description": "Period unit: DAILY, WEEKLY, MONTHLY, YEARLY"
+          },
+          "Day": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Day of the period to charge (e.g. 15 for the 15th of each month when Period=MONTHLY)"
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of recurrences. 0 = indefinite."
+          },
+          "FromDate": {
+            "type": "string",
+            "description": "Start date (YYYY-MM-DD)"
+          },
+          "ToDate": {
+            "type": "string",
+            "description": "End date (YYYY-MM-DD). Optional when Quantity is set."
+          },
+          "Status": {
+            "type": "string",
+            "description": "Status for change operation: ACTIVE, PAUSED, CANCELLED"
+          },
+          "Retries": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of retry attempts on failed charges"
+          },
+          "IsRequiredForContext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RecurringResponse": {
+        "type": "object",
+        "description": "Recurring payment agreement details and history",
+        "properties": {
+          "ResponseCode": {
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "AccountToken": {
+            "type": "string"
+          },
+          "Account": {
+            "type": "string",
+            "description": "Masked account number"
+          },
+          "Period": {
+            "type": "string"
+          },
+          "Frequency": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Day": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "Currency": {
+            "type": "string"
+          },
+          "FromDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ToDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "LastProcessDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of the last successful charge"
+          },
+          "Transactions": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "List of IDTransaction values for all charges made under this agreement"
+          },
+          "RemainingTries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "ThreeDS": {
+        "type": "object",
+        "description": "3D Secure authentication data. Include when the card has been authenticated through a 3DS flow before calling Authorize.",
+        "properties": {
+          "authenticationValue": {
+            "type": "string",
+            "description": "CAVV / Authentication Value from the 3DS response"
+          },
+          "eci": {
+            "type": "string",
+            "description": "Electronic Commerce Indicator"
+          },
+          "status": {
+            "type": "string",
+            "description": "3DS authentication status (e.g. Y, A, U)"
+          },
+          "protocolVersion": {
+            "type": "string",
+            "description": "3DS protocol version (e.g. '2.1.0')"
+          },
+          "dsTransId": {
+            "type": "string",
+            "description": "Directory Server Transaction ID"
+          },
+          "acsTransId": {
+            "type": "string",
+            "description": "Access Control Server Transaction ID"
+          },
+          "cardToken": {
+            "type": "string"
+          },
+          "scaIndicator": {
+            "type": "boolean",
+            "description": "Strong Customer Authentication indicator"
+          }
+        }
+      },
+      "ApplyCreditRequest": {
+        "required": [
+          "MerchantKey",
+          "AccountType",
+          "AccountNumber",
+          "RoutingNumber",
+          "Amount",
+          "Currency",
+          "Invoice"
+        ],
+        "type": "object",
+        "description": "ACH credit (push payment) request. Supports AccountType 2 (Checking) and 3 (Savings) only.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string",
+            "description": "Merchant terminal key"
+          },
+          "AccountType": {
+            "type": "string",
+            "description": "2 = ACH Checking, 3 = ACH Savings"
+          },
+          "AccountNumber": {
+            "type": "string",
+            "description": "Customer's bank account number"
+          },
+          "RoutingNumber": {
+            "type": "string",
+            "description": "9-digit ABA routing number"
+          },
+          "EffectiveDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Effective date for ACH processing. Default: same business day"
+          },
+          "CustomerId": {
+            "type": "string",
+            "description": "Your system's customer identifier"
+          },
+          "CustomerName": {
+            "type": "string"
+          },
+          "CustomerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "CustomerAddress": {
+            "type": "string"
+          },
+          "CustomerCity": {
+            "type": "string"
+          },
+          "CustomerState": {
+            "type": "string"
+          },
+          "ZipCode": {
+            "type": "string"
+          },
+          "Amount": {
+            "type": "string",
+            "description": "Credit amount as decimal string (e.g. '25.00')"
+          },
+          "Currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code (e.g. '840' for USD)"
+          },
+          "Tax": {
+            "type": "string",
+            "description": "Tax amount. Optional."
+          },
+          "Invoice": {
+            "type": "string",
+            "description": "Unique reference/invoice number"
+          },
+          "Transaction_Detail": {
+            "type": "string",
+            "description": "Description of the credit purpose"
+          }
+        }
+      },
+      "ApplyCreditTokenRequest": {
+        "required": [
+          "MerchantKey",
+          "AccountToken",
+          "Amount",
+          "Currency",
+          "Invoice"
+        ],
+        "type": "object",
+        "description": "ACH credit using a stored token.",
+        "properties": {
+          "MerchantKey": {
+            "type": "string"
+          },
+          "AccountToken": {
+            "type": "string",
+            "description": "Stored ACH account token"
+          },
+          "Amount": {
+            "type": "string",
+            "description": "Credit amount as decimal string"
+          },
+          "Currency": {
+            "type": "string"
+          },
+          "Tax": {
+            "type": "string"
+          },
+          "Invoice": {
+            "type": "string"
+          },
+          "Transaction_Detail": {
+            "type": "string"
+          },
+          "EffectiveDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "x-readme": {}
+}

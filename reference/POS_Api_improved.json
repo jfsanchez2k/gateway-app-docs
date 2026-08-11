@@ -1,0 +1,2767 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "POS API",
+    "version": "v2"
+  },
+  "paths": {
+    "/api/v2/POS/Sale": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CaptureAdjustmentByID": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CaptureByID": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Refund": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/VoidSale": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/VoidByID": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/BatchClose": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/FoodPurchase": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CashPuchase": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/FoodReturn": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/BalanceInquiry": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CashPurchaseCashBack": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CashAdvance": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/FoodVoucher": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/CashVoucher": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/GetTransactionByID": {
+      "get": {
+        "tags": [
+          "Pos"
+        ],
+        "parameters": [
+          {
+            "name": "TransactionID",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Transactions": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionSearchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionSearchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentDeviceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/PrintTransactionByID": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionPrintRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionPrintRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionPrintRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Ping": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Signature": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignatureResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignatureResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignatureResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Display": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisplayRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisplayRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisplayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/UploadImages": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadImageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadImageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadImageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/PairTerminal": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairTerminalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairTerminalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairTerminalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairTerminalResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairTerminalResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairTerminalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/ReasignTerminal": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasignTerminalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasignTerminalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasignTerminalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasignTerminalResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasignTerminalResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReasignTerminalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/UnPairTerminal": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnPairTerminalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnPairTerminalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnPairTerminalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/GetTerminal": {
+      "get": {
+        "tags": [
+          "Pos"
+        ],
+        "parameters": [
+          {
+            "name": "posKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTerminalResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTerminalResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTerminalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/RegisterTerminal": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterTerminalResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterTerminalResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterTerminalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/RemoveTerminal": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveDeviceRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveDeviceRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveDeviceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/ChangePOSStatus": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePOSStatusRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePOSStatusRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePOSStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/GetDevicePosKeys": {
+      "get": {
+        "tags": [
+          "Pos"
+        ],
+        "parameters": [
+          {
+            "name": "serial",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDevicePosKeysResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDevicePosKeysResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDevicePosKeysResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/RenewDeviceConnectionString": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewDeviceConnectionStringRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewDeviceConnectionStringRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewDeviceConnectionStringRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDeviceConnectionStringResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDeviceConnectionStringResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDeviceConnectionStringResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/POS/Email": {
+      "post": {
+        "tags": [
+          "Pos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptData"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptData"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BaseResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchRequest": {
+        "type": "object",
+        "properties": {
+          "autoPrint": {
+            "type": "boolean"
+          },
+          "merchantSlot": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchResponse": {
+        "type": "object",
+        "properties": {
+          "batchStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "batchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "sale_Count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sale_Total": {
+            "type": "number",
+            "format": "double"
+          },
+          "refund_Count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "refund_Total": {
+            "type": "number",
+            "format": "double"
+          },
+          "void_Count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "void_Total": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CaptureRequest": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "cashBackAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "tipAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tax"
+            },
+            "nullable": true
+          },
+          "autoPrint": {
+            "type": "boolean"
+          },
+          "merchantName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CardType": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ChangePOSStatusRequest": {
+        "type": "object",
+        "properties": {
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "posStatus": {
+            "$ref": "#/components/schemas/POS_STATUS"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomField": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Device": {
+        "type": "object",
+        "properties": {
+          "serial": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceAdditionalData": {
+        "type": "object",
+        "properties": {
+          "resultCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostResponse": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostDetailedMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "gatewayRawResponse": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DisplayRequest": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string",
+            "nullable": true
+          },
+          "subTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalTax": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "nullable": true
+          },
+          "closeDisplay": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EbtBalance": {
+        "type": "object",
+        "properties": {
+          "cash": {
+            "type": "number",
+            "format": "double"
+          },
+          "food": {
+            "type": "number",
+            "format": "double"
+          },
+          "market": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Fallback": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "ebtAutoBalance": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetDevicePosKeysResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "serial": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectionString": {
+            "type": "string",
+            "nullable": true
+          },
+          "posKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/POS"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetTerminalResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "device": {
+            "$ref": "#/components/schemas/Device"
+          },
+          "terminal": {
+            "$ref": "#/components/schemas/POS"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "productCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "productName": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitOfMeasurement": {
+            "type": "string",
+            "nullable": true
+          },
+          "measurement": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "tax": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MerchantDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true
+          },
+          "address2": {
+            "type": "string",
+            "nullable": true
+          },
+          "address3": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone1": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone2": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "POS": {
+        "type": "object",
+        "properties": {
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/POS_STATUS"
+          }
+        },
+        "additionalProperties": false
+      },
+      "POS_STATUS": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "PairTerminalRequest": {
+        "type": "object",
+        "properties": {
+          "deviceSerial": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceSecret": {
+            "type": "string",
+            "nullable": true
+          },
+          "posDescription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PairTerminalResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/POS_STATUS"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cardType": {
+            "$ref": "#/components/schemas/CardType"
+          },
+          "invoice": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "cashBackAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "tipAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tax"
+            },
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "preAuth": {
+            "type": "boolean"
+          },
+          "forceDuplicates": {
+            "type": "boolean"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "nullable": true
+          },
+          "extData": {
+            "type": "string",
+            "nullable": true
+          },
+          "fallback": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Fallback"
+            },
+            "nullable": true
+          },
+          "autoPrint": {
+            "type": "boolean"
+          },
+          "merchantSlot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signature": {
+            "type": "boolean"
+          },
+          "cardNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "authCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCash": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaymentDeviceListResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceAdditionalData": {
+            "$ref": "#/components/schemas/DeviceAdditionalData"
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentDeviceResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaymentDeviceResponse": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "originTransactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "merchantCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "cashbackAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "tipAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "approvedAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "originalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "partialApproval": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "account": {
+            "type": "string",
+            "nullable": true
+          },
+          "accountToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "idTransaction": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "acquirerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "cardHolderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "expDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "aid": {
+            "type": "string",
+            "nullable": true
+          },
+          "iad": {
+            "type": "string",
+            "nullable": true
+          },
+          "arc": {
+            "type": "string",
+            "nullable": true
+          },
+          "tvr": {
+            "type": "string",
+            "nullable": true
+          },
+          "tsi": {
+            "type": "string",
+            "nullable": true
+          },
+          "cardBrand": {
+            "type": "string",
+            "nullable": true
+          },
+          "entryMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "authNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "reference_Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "auditNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "emvData": {
+            "type": "string",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxControl": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "balance": {
+            "$ref": "#/components/schemas/EbtBalance"
+          },
+          "deviceAdditionalData": {
+            "$ref": "#/components/schemas/DeviceAdditionalData"
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PingResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReasignTerminalRequest": {
+        "type": "object",
+        "properties": {
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceSerial": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReasignTerminalResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/POS_STATUS"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReceiptData": {
+        "type": "object",
+        "properties": {
+          "merchant": {
+            "$ref": "#/components/schemas/MerchantDetails"
+          },
+          "transactionDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "account": {
+            "type": "string",
+            "nullable": true
+          },
+          "entry": {
+            "type": "string",
+            "nullable": true
+          },
+          "cardBrand": {
+            "type": "string",
+            "nullable": true
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "nullable": true
+          },
+          "taxDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tax"
+            },
+            "nullable": true
+          },
+          "tipAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "authCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "pinVerified": {
+            "type": "boolean"
+          },
+          "aid": {
+            "type": "string",
+            "nullable": true
+          },
+          "iad": {
+            "type": "string",
+            "nullable": true
+          },
+          "arc": {
+            "type": "string",
+            "nullable": true
+          },
+          "tvr": {
+            "type": "string",
+            "nullable": true
+          },
+          "tsi": {
+            "type": "string",
+            "nullable": true
+          },
+          "fiscalControlNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RefundRequest": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "cardType": {
+            "$ref": "#/components/schemas/CardType"
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "invoice": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tax"
+            },
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "nullable": true
+          },
+          "extData": {
+            "type": "string",
+            "nullable": true
+          },
+          "autoPrint": {
+            "type": "boolean"
+          },
+          "merchantSlot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signature": {
+            "type": "boolean"
+          },
+          "isCash": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterDeviceRequest": {
+        "type": "object",
+        "properties": {
+          "serial": {
+            "type": "string",
+            "nullable": true
+          },
+          "posKeyDescription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterTerminalResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectionString": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RemoveDeviceRequest": {
+        "type": "object",
+        "properties": {
+          "serial": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RenewDeviceConnectionStringRequest": {
+        "type": "object",
+        "properties": {
+          "serial": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RenewDeviceConnectionStringResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "serial": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectionString": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignatureResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "signatureBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "signaturePoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimedPoints"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Tax": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TimedPoints": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "float"
+          },
+          "y": {
+            "type": "number",
+            "format": "float"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionPrintRequest": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionSearchCriteria": {
+        "type": "object",
+        "properties": {
+          "serviceKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "invoice": {
+            "type": "string",
+            "nullable": true
+          },
+          "amountFrom": {
+            "type": "number",
+            "format": "double"
+          },
+          "amountTo": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransactionSearchRequest": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/TransactionSearchCriteria"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnPairTerminalRequest": {
+        "type": "object",
+        "properties": {
+          "posKey": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UploadImageItem": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UploadImageRequest": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UploadImageItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VoidRequest": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "authNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "reference_Code": {
+            "type": "string",
+            "nullable": true
+          },
+          "auditNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "autoPrint": {
+            "type": "boolean"
+          },
+          "merchantName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "POS_KEY": {
+        "type": "apiKey",
+        "description": "Please enter your Pos Key",
+        "name": "POS_KEY",
+        "in": "header"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+- v6_authorize
+- v6_authorizetoken
+- v6_refund
+- v6_refundtoken
+- v6_refundbyid
+- v6_voidbyid
+- v6_voidsale
+- v6_capturebyid
+- v6_captureadjustmendbyid
+- v6_closebatchresumen
+- v6_applycredit
+- v6_applycredittoken

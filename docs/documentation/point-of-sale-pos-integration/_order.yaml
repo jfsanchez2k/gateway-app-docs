@@ -1,0 +1,13 @@
+- payment-flow-pos-integration
+- card-present-payments
+- duplicate-transaction-handling
+- optional-sale-elements
+- signature
+- batch-close
+- implementation-types
+- ebt-card-present-payments
+- pos-message-authentication
+- pos-response-code-table
+- firewall-rules
+- pos-revisions
+- pax-android-application-integration

@@ -1,0 +1,1394 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Pay2Link API",
+    "version": "v1",
+    "description": "Pay2Link (Pay2Link) REST API for generating and managing payment links (invoices) sent to customers via email or SMS.\n\n## Authentication\n\nPay2Link uses its **own token**, separate from the main Agilpay WebAPI token.\n\n**Step 1** — Call `GET /api/Authorization/gettoken` with your `companyKey` in the request header.\n\n**Step 2** — The response includes a JWT Bearer token. Send it as `Authorization: Bearer <token>` on all subsequent requests.\n\nThe `companyKey` (UUID) is assigned by Agilpay and identifies your Pay2Link company/organization."
+  },
+  "servers": [
+    {
+      "url": "https://pay2link-api.agilpay.net",
+      "description": "Production"
+    },
+    {
+      "url": "https://sandbox-pay2link-api.agilpay.net",
+      "description": "Sandbox — use for testing. Payment links are not sent to real customers."
+    }
+  ],
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authorization",
+      "description": "Obtain the Pay2Link Bearer token. Call this before any other endpoint."
+    },
+    {
+      "name": "Customers",
+      "description": "Customer directory management."
+    },
+    {
+      "name": "Invoice",
+      "description": "Invoice (payment link) lifecycle: create, search, resend, cancel, sync, and attachments."
+    }
+  ],
+  "paths": {
+    "/api/Authorization/gettoken": {
+      "get": {
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Obtain Pay2Link Bearer token",
+        "description": "Generates a JWT Bearer token for Pay2Link API access. Pass your `companyKey` (UUID) in the `companyKey` header.\n\n**Note:** This token is specific to Pay2Link and is different from the Agilpay WebAPI OAuth token obtained via `/oauth/token`.",
+        "operationId": "Authorization_GetToken",
+        "security": [],
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "description": "Company UUID assigned by Agilpay for your Pay2Link account",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JWT Bearer token issued. Use the returned token as `Authorization: Bearer <token>` on all subsequent calls.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing companyKey"
+          }
+        }
+      }
+    },
+    "/api/Customers/GetCustomers": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "summary": "List customers",
+        "description": "Returns a paginated list of customers registered in Pay2Link. Supports filtering by account number or name.",
+        "operationId": "Customers_GetCustomers",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "description": "Company UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "description": "Number of records per page",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "description": "Page number (1-based)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "accountNumber",
+            "in": "query",
+            "required": false,
+            "description": "Filter by customer account number",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter by customer name (partial match supported)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated customer list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerInfo"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid Bearer token"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/addinvoice": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Create invoice(s) / payment link(s)",
+        "description": "Creates one or more invoices (payment links) and optionally sends notifications to customers.\n\nEach invoice generates a unique payment URL that the customer can use to pay online.\n\nSet `sendNotification: true` and `notificationType` to control delivery:\n- `1` = Email\n- `2` = SMS\n- `3` = Email and SMS\n\nUse `invoiceSettings` to control which payment methods appear on the hosted payment page.\n\n**Replaces the deprecated `/api/Invoice/setinvoice` endpoint.**",
+        "operationId": "Invoice_AddInvoice",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "description": "Company UUID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Array of invoices to create (can be a single-element array)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InvoiceRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoices created. Returns created invoice details including generated payment links.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/setinvoice": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Create invoice(s) [DEPRECATED]",
+        "description": "**Deprecated.** Use `/api/Invoice/addinvoice` instead.",
+        "operationId": "Invoice_SetInvoice",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InvoiceRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "See /api/Invoice/addinvoice"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/Invoice/UpdateInvoice": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Update existing invoice(s)",
+        "description": "Updates one or more existing invoices. Include `invoiceNumber` to identify the invoice to update.\n\nCommonly used to update amount, due date, status, or customer info on a pending invoice.",
+        "operationId": "Invoice_UpdateInvoice",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Array of invoices to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InvoiceRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoices updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/getinvoices": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Search invoices",
+        "description": "Returns a list of invoices matching the provided filters. All filter fields are optional.",
+        "operationId": "Invoice_GetInvoices",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Search filters (all optional)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceSearchFilters"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of matching invoices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceResult"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/resendinvoice": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Resend invoice notification",
+        "description": "Resends the payment link notification for an existing invoice via email, SMS, or both.\n\n`type` values:\n- `1` = Email\n- `2` = SMS\n- `3` = Email and SMS",
+        "operationId": "Invoice_ResendInvoice",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Resend parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReSendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification resent successfully"
+          },
+          "400": {
+            "description": "Invoice not found or already cancelled"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/cancelinvoice": {
+      "put": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Cancel an invoice",
+        "description": "Cancels an open invoice, making the payment link inactive. Paid invoices cannot be cancelled.",
+        "operationId": "Invoice_CancelInvoice",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Invoice to cancel",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoice cancelled"
+          },
+          "400": {
+            "description": "Invoice already paid or not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/getpayments": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Search payments",
+        "description": "Returns a list of payments (completed or pending) matching the provided filters. Use this to reconcile payments received through Pay2Link.",
+        "operationId": "Invoice_GetPayments",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Payment search filters (all optional)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentSearchFilters"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of matching payments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentResult"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/getpaymentstosync": {
+      "get": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Get payments pending sync",
+        "description": "Returns payments that have been received but not yet acknowledged as synced by your system.\n\nUse this in a polling loop to detect new payments. After processing each payment, call `PUT /api/Invoice/setsyncedpayments` to acknowledge them and remove them from the pending sync queue.",
+        "operationId": "Invoice_GetPaymentsToSync",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payments pending sync acknowledgment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentResult"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/setsyncedpayments": {
+      "put": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Acknowledge synced payments",
+        "description": "Marks payments as acknowledged/synced in Pay2Link. Call this after processing payments returned by `GET /api/Invoice/getpaymentstosync`. Acknowledged payments will no longer appear in the sync queue.",
+        "operationId": "Invoice_SetSyncedPayments",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "List of payment IDs to acknowledge",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SyncedPayment"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payments acknowledged"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/ObtainCompanySettings": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Get company Pay2Link settings",
+        "description": "Returns the Pay2Link configuration for the company: default payment methods, branding settings, allowed currencies, and notification preferences.",
+        "operationId": "Invoice_ObtainCompanySettings",
+        "parameters": [
+          {
+            "name": "companyKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Company settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/Invoice/InvoiceInsertAttachment": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Attach a file to an invoice",
+        "description": "Uploads and attaches a file (PDF, image, etc.) to an existing invoice. The file must be Base64-encoded in the `content` field.",
+        "operationId": "Invoice_InsertAttachment",
+        "requestBody": {
+          "required": true,
+          "description": "Attachment details and Base64-encoded file content",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceInsertAttachmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attachment uploaded"
+          },
+          "400": {
+            "description": "Validation error or file too large"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/Invoice/InvoiceGetAttachmentList": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "List attachments for an invoice",
+        "description": "Returns the list of files attached to an invoice. Set `withContent: true` to include the Base64-encoded file contents in the response.",
+        "operationId": "Invoice_GetAttachmentList",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInvoiceAttachmentListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of attachments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceAttachmentResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/Invoice/InvoiceDeleteAttachment": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Delete an invoice attachment",
+        "description": "Permanently removes an attachment from an invoice.",
+        "operationId": "Invoice_DeleteAttachment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceDeleteAttachmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attachment deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/Invoice/GetAttachmentByInvoiceId": {
+      "get": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Get attachments by invoice ID",
+        "description": "Returns all attachments for a given internal invoice ID.",
+        "operationId": "Invoice_GetAttachmentByInvoiceId",
+        "parameters": [
+          {
+            "name": "InvoiceId",
+            "in": "query",
+            "required": true,
+            "description": "Internal invoice ID (not the invoiceNumber)",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attachment list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceAttachmentResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token obtained from GET /api/Authorization/gettoken using your companyKey."
+      }
+    },
+    "schemas": {
+      "TokenResponse": {
+        "type": "object",
+        "description": "JWT token issued for Pay2Link API access",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "Bearer token to include in subsequent requests"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Token lifetime in seconds"
+          }
+        }
+      },
+      "CustomerInfo": {
+        "type": "object",
+        "description": "Customer contact and identification details",
+        "properties": {
+          "accountNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Your system's customer account number"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailAddress": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true
+          },
+          "address2": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "zipCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true,
+            "description": "Stored payment token (from Agilpay WebAPI) for pre-filled wallet on the payment page"
+          },
+          "taxPayerNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Tax ID / RNC / SSN for fiscal receipt generation"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceRequest": {
+        "type": "object",
+        "description": "Invoice (payment link) creation or update request",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/CustomerInfo"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Your reference/invoice number. Must be unique per company. Used to identify the invoice in subsequent calls."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Invoice description shown on the payment page"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Invoice status. Valid values: OPEN, PAID, CANCELLED, EXPIRED"
+          },
+          "currency": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Currency code: 1 = USD, 2 = DOP (Dominican Peso). Contact Agilpay for additional currencies."
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double",
+            "description": "Total invoice amount"
+          },
+          "minAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "description": "Minimum payment amount. Required when `allowPartialPayment` is true in invoiceSettings."
+          },
+          "balance": {
+            "type": "number",
+            "format": "double",
+            "nullable": true,
+            "description": "Current outstanding balance. Defaults to totalAmount on creation."
+          },
+          "invoiceDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Invoice issue date (ISO 8601)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Payment due date. The payment link remains active past this date unless explicitly cancelled."
+          },
+          "taxReceiptNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Tax receipt or fiscal document number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItem"
+            },
+            "nullable": true,
+            "description": "Line items. If provided, totalAmount must equal the sum of (quantity × amount) + tax across all items."
+          },
+          "invoiceSettings": {
+            "$ref": "#/components/schemas/InvoiceSettings"
+          },
+          "sendNotification": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Set to true to send the payment link to the customer immediately upon creation"
+          },
+          "notificationType": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "description": "Notification channel when sendNotification is true. 1 = Email, 2 = SMS, 3 = Email and SMS"
+          },
+          "isSyncing": {
+            "type": "boolean",
+            "description": "Set to true when creating invoices from an external system sync. Prevents duplicate notification sends during batch imports."
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Username of the operator creating the invoice (for audit trail)"
+          },
+          "attachment": {
+            "$ref": "#/components/schemas/InvoiceAttachmentRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceItem": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "Product/service code from your catalog"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Unit price"
+          },
+          "tax": {
+            "type": "number",
+            "format": "double",
+            "description": "Tax amount for this line item"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceSettings": {
+        "type": "object",
+        "description": "Controls which payment methods and options appear on the hosted payment page for this invoice",
+        "properties": {
+          "allowPartialPayment": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Allow customer to pay less than totalAmount (down to minAmount)"
+          },
+          "btnBhd": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show Banco BHD León payment button on the payment page"
+          },
+          "btnTc": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show credit/debit card (Tarjeta de Crédito) payment option"
+          },
+          "btnAch": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show ACH bank transfer payment option"
+          },
+          "btnPopular": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show Banco Popular payment button"
+          },
+          "showWallet": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show the customer's stored payment tokens (wallet) on the payment page"
+          },
+          "showPaymentsOptions": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Show the payment method selection panel"
+          },
+          "requiresAddress": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Require the customer to enter a billing address before paying"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceSearchFilters": {
+        "type": "object",
+        "description": "All fields are optional. Combine filters to narrow results.",
+        "properties": {
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter by status: OPEN, PAID, CANCELLED, EXPIRED"
+          },
+          "dateFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Start of invoice date range (ISO 8601)"
+          },
+          "dateTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "End of invoice date range (ISO 8601)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaymentSearchFilters": {
+        "type": "object",
+        "description": "All fields are optional.",
+        "properties": {
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerAccountNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter by payment status: APPROVED, DECLINED, PENDING"
+          },
+          "dateFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CancelInvoiceRequest": {
+        "type": "object",
+        "properties": {
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The invoice number to cancel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReSendRequest": {
+        "type": "object",
+        "properties": {
+          "invoiceNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Invoice number to resend"
+          },
+          "mailContent": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional custom message body to include in the notification email"
+          },
+          "type": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "description": "Notification channel: 1 = Email, 2 = SMS, 3 = Email and SMS"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Operator username (for audit trail)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceResult": {
+        "type": "object",
+        "description": "Invoice details returned after create, update, or search",
+        "properties": {
+          "invoiceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal Pay2Link invoice ID"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "description": "Your reference invoice number"
+          },
+          "paymentUrl": {
+            "type": "string",
+            "description": "The unique payment link URL to share with the customer"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current invoice status: OPEN, PAID, CANCELLED, EXPIRED"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "balance": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "invoiceDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerInfo"
+          }
+        }
+      },
+      "PaymentResult": {
+        "type": "object",
+        "description": "Payment record for a completed or pending Pay2Link payment",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal Pay2Link payment ID"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "customerAccountNumber": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "type": "string",
+            "description": "APPROVED, DECLINED, PENDING"
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Agilpay IDTransaction — use this to query the main WebAPI (GetTransactionByID) for full transaction details"
+          },
+          "paymentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method used: CARD, ACH, BHD, POPULAR"
+          }
+        }
+      },
+      "SyncedPayment": {
+        "type": "object",
+        "description": "Payment acknowledgment for sync queue",
+        "properties": {
+          "payment": {
+            "$ref": "#/components/schemas/PaymentToSync"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaymentToSync": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal Pay2Link payment ID to acknowledge"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompanySettings": {
+        "type": "object",
+        "description": "Pay2Link company configuration",
+        "properties": {
+          "defaultCurrency": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Default currency (1=USD, 2=DOP)"
+          },
+          "defaultInvoiceSettings": {
+            "$ref": "#/components/schemas/InvoiceSettings"
+          },
+          "notificationEmail": {
+            "type": "string",
+            "description": "Default sender/reply-to email for notifications"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Company logo URL shown on the payment page"
+          }
+        }
+      },
+      "InvoiceAttachmentRequest": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "description": "File name including extension (e.g. 'invoice.pdf')"
+          },
+          "fileLength": {
+            "type": "integer",
+            "format": "int32",
+            "description": "File size in bytes"
+          },
+          "fileContentType": {
+            "type": "string",
+            "nullable": true,
+            "description": "MIME type (e.g. 'application/pdf', 'image/png')"
+          },
+          "content": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "description": "Base64-encoded file content"
+          },
+          "createUser": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceInsertAttachmentRequest": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal invoice ID to attach the file to"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileContentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "description": "Base64-encoded file content"
+          },
+          "createUser": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetInvoiceAttachmentListRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter by specific attachment ID. Optional."
+          },
+          "invoiceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Invoice ID to list attachments for"
+          },
+          "withContent": {
+            "type": "boolean",
+            "description": "Set to true to include Base64-encoded file content in the response (increases payload size)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceDeleteAttachmentRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "invoiceId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvoiceAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "invoiceId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "fileContentType": {
+            "type": "string"
+          },
+          "fileLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "description": "Base64-encoded content. Only present when withContent=true."
+          },
+          "createUser": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
