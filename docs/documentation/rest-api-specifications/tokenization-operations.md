@@ -15,11 +15,11 @@ Tokenization replaces sensitive card or ACH account data with a reusable, non-se
 
 ## Operations
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| [RegisterToken](https://agilpay.readme.io/reference/v6_registertoken) | POST | Tokenize a card or ACH account — no charge made |
-| [GetCustomerTokens](https://agilpay.readme.io/reference/v6_getcustomertokens) | GET | List all active tokens for a customer |
-| [DeleteCustomerToken](https://agilpay.readme.io/reference/v6_deletecustomertoken) | POST | Permanently remove a stored token |
+| Endpoint                                                                                   | Method | Description                                     |
+| ------------------------------------------------------------------------------------------ | ------ | ----------------------------------------------- |
+| [RegisterToken](https://agiltech-gateway.readme.io/reference/v6_registertoken)             | POST   | Tokenize a card or ACH account — no charge made |
+| [GetCustomerTokens](https://agiltech-gateway.readme.io/reference/v6_getcustomertokens)     | GET    | List all active tokens for a customer           |
+| [DeleteCustomerToken](https://agiltech-gateway.readme.io/reference/v6_deletecustomertoken) | POST   | Permanently remove a stored token               |
 
 ## Token lifecycle
 
